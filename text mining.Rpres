@@ -1,0 +1,216 @@
+Text Mining with the tm Library
+========================================================
+author: Mhairi McNeill
+date: 16/09/2015
+
+```{r}
+library(tm)
+```
+
+
+What I'll cover
+========================================================
+
+- Loading in the data
+- Cleaning text
+- Making a document-term matrix
+- Where you can go from there
+
+
+Loading in Data
+========================================================
+
+- First make a source object
+- Then a corpus object 
+
+```{r}
+reviews <- read.csv("reviews.csv", stringsAsFactors=FALSE)
+
+review_source <- VectorSource(reviews$text)
+corpus <- Corpus(review_source)
+```
+
+
+Cleaning
+========================================================
+
+```{r, echo = FALSE}
+inspect <- function(corpus, i = 200) substr(corpus[[1]][1], 1, i)
+```
+```{r}
+inspect(corpus)
+```
+
+Cleaning - to lowercase
+========================================================
+
+```{r, echo = FALSE}
+inspect <- function(corpus, i = 200) substr(corpus[[1]][1], 1, i)
+```
+```{r}
+corpus <- tm_map(corpus, content_transformer(tolower))
+inspect(corpus)
+```
+
+
+Cleaning - removing punctuation
+========================================================
+
+```{r}
+corpus <- tm_map(corpus, removePunctuation)
+inspect(corpus)
+```
+
+Cleaning - removing whitespace
+========================================================
+
+```{r}
+corpus <- tm_map(corpus, stripWhitespace)
+inspect(corpus)
+```
+
+Cleaning - removing stopwords
+========================================================
+
+```{r}
+corpus <- tm_map(corpus, removeWords, stopwords("english"))
+inspect(corpus)
+```
+
+Cleaning - steming 
+========================================================
+
+```{r}
+corpus <- tm_map(corpus, stemDocument)
+inspect(corpus)
+```
+
+
+Making a Document Term Matrix
+========================================================
+
+- Can do document-term matrix
+- or term-document matrix
+
+```{r}
+dtm <- DocumentTermMatrix(corpus)
+tdm <- TermDocumentMatrix(corpus)
+```
+
+
+Finding most frequent words
+========================================================
+
+```{r}
+frequency <- colSums(as.matrix(dtm))
+frequency <- sort(frequency, decreasing=TRUE)
+head(frequency)
+```
+
+
+Making a word cloud
+========================================================
+
+```{r}
+library(wordcloud)
+wordcloud(names(frequency)[1:100], frequency[1:100])
+```
+
+
+Finding Correlated Words
+========================================================
+
+```{r}
+findAssocs(dtm, terms = c('game', 'broke', 'cat'), corlimit = 0.2)
+```
+
+
+Removing sparse terms
+========================================================
+
+```{r}
+dim(dtm)
+dtm_small <- removeSparseTerms(dtm, 0.99)
+dim(dtm_small)
+```
+
+
+Making a linear model 
+========================================================
+
+```{r}
+model <- lm(reviews$rating ~ .,
+            data = as.data.frame(as.matrix(dtm_small)))
+
+
+```
+
+Making a linear model 
+========================================================
+
+```{r, echo = FALSE}
+library(dplyr)
+library(ggplot2)
+coefs <- 
+summary(model)$coefficients %>%
+  as.data.frame() %>%
+  add_rownames('word') %>%         # convert rowname to variable
+  slice(-1) %>%                    # remove intercept
+  subset(`Pr(>|t|)` < 0.001) %>%   # only significant terms
+  mutate(order = order(Estimate),  # make into ordered factor
+         word  = factor(word, levels = word[order])) 
+         
+ggplot(coefs) +
+  aes(x = word, y = Estimate,  fill = Estimate) +
+  geom_bar(stat="identity", position = 'dodge') +
+  scale_fill_gradientn(colours=brewer.pal(10, "Spectral"), name="Effect size") +
+  coord_flip() +
+  xlab("Word") +
+  ylab("\nEffect Size")
+```
+
+Top Terms for each country 
+========================================================
+
+```{r}
+by_country <- 
+  reviews %>%
+  group_by(location) %>%
+  summarise(text = paste(text, collapse = ' '))
+
+review_source <- VectorSource(by_country$text)
+corpus <- Corpus(review_source)
+```
+
+Top Terms for each country 
+========================================================
+
+```{r, echo = FALSE}
+by_country <- 
+  reviews %>%
+  group_by(location) %>%
+  summarise(text = paste(text, collapse = ' '))
+
+review_source <- VectorSource(by_country$text)
+corpus <- Corpus(review_source)
+
+#Cleaning
+corpus <- tm_map(corpus, content_transformer(tolower))
+corpus <- tm_map(corpus, removePunctuation)
+corpus <- tm_map(corpus, stripWhitespace)
+corpus <- tm_map(corpus, removeWords, stopwords("english"))
+
+# Make document term matrix, weighted by TF-IDF
+dtm <- DocumentTermMatrix(corpus)
+
+dtm <- removeSparseTerms(dtm, 0.3)
+dtm <- as.matrix(dtm)
+
+# Find top terms for each country
+top_terms <- lapply(1:4, function(i) names(sort(dtm[i,], decreasing = TRUE))[1:10])
+names(top_terms) <- by_country$location
+top_terms
+```
+
+
+
