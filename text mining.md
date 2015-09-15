@@ -74,7 +74,7 @@ inspect(corpus)
 [1] " so addicting  deff downlaod its epic you cat lovers will fall in love 3"
 ```
 
-Cleaning - removing whitespace
+Cleaning - removing white space
 ========================================================
 
 
@@ -87,7 +87,7 @@ inspect(corpus)
 [1] " so addicting deff downlaod its epic you cat lovers will fall in love 3"
 ```
 
-Cleaning - removing stopwords
+Cleaning - removing stop-words
 ========================================================
 
 
@@ -100,7 +100,7 @@ inspect(corpus)
 [1] "  addicting deff downlaod  epic  cat lovers will fall  love 3"
 ```
 
-Cleaning - steming 
+Cleaning - stemming 
 ========================================================
 
 
