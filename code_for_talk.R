@@ -99,7 +99,7 @@ corpus <- tm_map(corpus, stripWhitespace)
 corpus <- tm_map(corpus, removeWords, stopwords("english"))
 
 # Make document term matrix, weighted by TF-IDF
-dtm <- DocumentTermMatrix(corpus)
+dtm <- DocumentTermMatrix(corpus, control = list(weighting =  weightTfIdf))
 dtm <- removeSparseTerms(dtm, 0.3)
 dtm <- as.matrix(dtm)
 

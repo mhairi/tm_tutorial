@@ -22,7 +22,7 @@ Loading in Data
 ========================================================
 
 - First make a source object
-- Then a corpus object 
+- Then a corpus object
 
 
 ```r
@@ -127,6 +127,28 @@ tdm <- TermDocumentMatrix(corpus)
 ```
 
 
+Removing sparse terms
+========================================================
+
+
+```r
+dim(dtm)
+```
+
+```
+[1] 1000 2250
+```
+
+```r
+dtm_small <- removeSparseTerms(dtm, 0.99)
+dim(dtm_small)
+```
+
+```
+[1] 1000  205
+```
+
+
 Finding most frequent words
 ========================================================
 
@@ -152,52 +174,8 @@ library(wordcloud)
 wordcloud(names(frequency)[1:100], frequency[1:100])
 ```
 
-![plot of chunk unnamed-chunk-13](text mining-figure/unnamed-chunk-13-1.png) 
+![plot of chunk unnamed-chunk-14](text mining-figure/unnamed-chunk-14-1.png) 
 
-
-Finding Correlated Words
-========================================================
-
-
-```r
-findAssocs(dtm, terms = c('game', 'broke', 'cat'), corlimit = 0.2)
-```
-
-```
-$game
-  play player   dont    new    say   ever   that 
-  0.29   0.22   0.21   0.21   0.21   0.20   0.20 
-
-$broke
-somepeopl   probabl   cheaper      cash     place       add 
-     1.00      0.76      0.71      0.63      0.30      0.25 
-
-$cat
-    deff downlaod    lover     epic     fall 
-     1.0      1.0      1.0      0.5      0.5 
-```
-
-
-Removing sparse terms
-========================================================
-
-
-```r
-dim(dtm)
-```
-
-```
-[1] 1000 2250
-```
-
-```r
-dtm_small <- removeSparseTerms(dtm, 0.99)
-dim(dtm_small)
-```
-
-```
-[1] 1000  205
-```
 
 
 Making a linear model 
@@ -212,7 +190,7 @@ model <- lm(reviews$rating ~ .,
 Making a linear model 
 ========================================================
 
-![plot of chunk unnamed-chunk-17](text mining-figure/unnamed-chunk-17-1.png) 
+![plot of chunk unnamed-chunk-16](text mining-figure/unnamed-chunk-16-1.png) 
 
 Top Terms for each country 
 ========================================================
@@ -231,24 +209,29 @@ corpus <- Corpus(review_source)
 Top Terms for each country 
 ========================================================
 
+Country     | Top Terms
+----------- | -------------
+UK          | iphone, version, watch
+US          | everything, wish, back
+Australia   | gems, amount, phone
+New Zealand | clans, troops, thanks
 
-```
-$au
- [1] "game"      "great"     "good"      "love"      "fun"      
- [6] "awesome"   "get"       "can"       "addictive" "play"     
 
-$gb
- [1] "game"      "good"      "great"     "fun"       "addictive"
- [6] "love"      "get"       "really"    "time"      "app"      
+Summary
+========================================================
 
-$nz
- [1] "game"    "good"    "love"    "awesome" "fun"     "great"   "play"   
- [8] "really"  "like"    "time"   
+- Read in data
+- Clean text
+- Make document term matrix
+- Remove sparse terms
+- Do anything else you like
 
-$us
- [1] "game"   "fun"    "love"   "great"  "play"   "get"    "like"  
- [8] "just"   "good"   "really"
-```
+Summary
+========================================================
+
+Thanks for listening!
+
+https://github.com/mhairi
 
 
 
